@@ -13,6 +13,7 @@ using DiscordRPC.Logging;
 using MajdataEdit.AutoSaveModule;
 using Microsoft.Win32;
 using Un4seen.Bass;
+using System.Runtime.InteropServices;
 using MajdataEdit.SyntaxModule;
 using Timer = System.Timers.Timer;
 
@@ -206,6 +207,8 @@ public partial class MainWindow : Window
         if ((bool)openFileDialog.ShowDialog()!)
         {
             var fileInfo = new FileInfo(openFileDialog.FileName);
+            Debug.WriteLine(openFileDialog.FileName);
+            Debug.WriteLine(fileInfo.DirectoryName!);
             initFromFile(fileInfo.DirectoryName!);
         }
     }
@@ -223,6 +226,109 @@ public partial class MainWindow : Window
     private void Menu_ExportRender_Click(object sender, RoutedEventArgs e)
     {
         TogglePlayAndPause(PlayMethod.Record);
+    }
+
+    static bool IsFfmpegFinished(string folderPath)
+    {
+        string filePath = Path.Combine(folderPath, "out.mp4");
+
+        // 如果文件不存在，直接返回 false
+        if (!File.Exists(filePath))
+        {
+            return false;
+        }
+
+        // 获取文件的最后修改时间
+        DateTime lastWriteTime = File.GetLastWriteTime(filePath);
+        Console.WriteLine($"File last write time: {lastWriteTime}");
+
+        // 等待文件修改时间不再改变，假设我们检查两次之间修改时间没有变化，则认为文件完成
+        Thread.Sleep(2000); // 等待2秒
+        DateTime newWriteTime = File.GetLastWriteTime(filePath);
+
+        // 如果两次修改时间相同，说明文件没有再被写入
+        return lastWriteTime == newWriteTime;
+    }
+
+    // 关闭文件资源管理器窗口
+    static void CloseExplorerWindow(string folderPath)
+    {
+        // 获取当前所有正在运行的进程
+        var processes = Process.GetProcessesByName("explorer");
+        string subDirName = Path.GetFileName(folderPath);
+        // 查找与目标文件夹路径相关的进程
+        foreach (var process in processes)
+        {
+            try
+            {
+                Debug.WriteLine(process.MainWindowTitle);
+                // 检查窗口标题是否包含文件夹路径
+                if (process.MainWindowTitle.Contains(subDirName))
+                {
+                    Debug.WriteLine($"Closing explorer window for: {subDirName}");
+                    process.Kill();  // 关闭文件资源管理器进程
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 忽略访问错误
+                Console.WriteLine($"Error closing explorer: {ex.Message}");
+            }
+        }
+    }
+
+    private void Menu_AllExport_Click(object sender, RoutedEventArgs e)
+    {
+		/*string filedir = "E:\\Maimai_map\\test\\Churros Parlor";
+		initFromFile(filedir);
+		LevelSelector.SelectedIndex = 4;
+		TogglePlayAndPause(PlayMethod.Record);*/
+
+        string baseDir = @"E:\Maimai_map\test";  // 基础目录
+        string[] subDirs = Directory.GetDirectories(baseDir);  // 获取所有子目录
+
+        foreach (string subDir in subDirs)
+        {
+            Debug.WriteLine($"Processing folder: {subDir}");
+            initFromFile(subDir);  // 对每个子目录执行操作
+            LevelSelector.SelectedIndex = 4;
+            TogglePlayAndPause(PlayMethod.Record);  // 播放录制操作
+
+            // 检查是否达到EditorControlMethod.Start状态，如果是则跳到下一个文件夹
+            while (true)
+            {
+                // 每2秒检查一次当前的控制方法
+                if (IsFfmpegFinished(subDir))
+                {
+                    Debug.WriteLine("FFmpeg has finished processing the video. Moving to next folder...");
+                    Thread.Sleep(2000);
+                    CloseExplorerWindow(subDir);
+                    break;  // 如果状态是Start，跳出当前循环，处理下一个文件夹
+                }
+
+                // 如果还未结束，等待2秒继续检查
+                Thread.Sleep(2000);
+            }
+            ToggleStop();
+        }
+
+        Debug.WriteLine("All folders processed.");
+
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int width, int height, uint flags);
+
+    // 常量定义
+    private static readonly IntPtr HWND_TOP = new IntPtr(0);
+    private const uint SWP_NOZORDER = 0x0004;
+    private const uint SWP_NOMOVE = 0x0002;
+
+    private void Menu_Change_Click(object sender, RoutedEventArgs e)
+    {
+        var process = Process.GetProcessesByName("MajdataView");
+        SetWindowPos(process[0].MainWindowHandle, HWND_TOP, 0, 0, 800, 800, SWP_NOZORDER | SWP_NOMOVE);
     }
 
     private void MirrorLeftRight_MenuItem_Click(object? sender, RoutedEventArgs e)
@@ -485,6 +591,8 @@ public partial class MainWindow : Window
     private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var i = LevelSelector.SelectedIndex;
+        if (i == -1) i = 0;
+        Console.WriteLine(i);
         SetRawFumenText(SimaiProcess.fumens[i]);
         selectedDifficulty = i;
         LevelTextBox.Text = SimaiProcess.levels[selectedDifficulty];
@@ -651,5 +759,8 @@ public partial class MainWindow : Window
 
     #endregion
 
-    
+    private void MenuItem_Click(object sender, RoutedEventArgs e)
+    {
+
+    }
 }

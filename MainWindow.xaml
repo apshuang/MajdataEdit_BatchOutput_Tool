@@ -58,7 +58,7 @@
         <Menu Height="19" VerticalAlignment="Top" Background="{DynamicResource ButtonsBackground}"
               Foreground="{DynamicResource ButtonForeground}" Grid.ColumnSpan="3" Grid.RowSpan="2">
             <MenuItem Header="{lex:Loc Files}" Foreground="{DynamicResource ButtonForeground}"
-                      Template="{DynamicResource DarkMenuItem}">
+                      Template="{DynamicResource DarkMenuItem}" Click="MenuItem_Click">
                 <MenuItem x:Name="Menu_New" Header="{lex:Loc New}" Click="Menu_New_Click" />
                 <MenuItem x:Name="Menu_Open" Header="{lex:Loc Open}" Click="Menu_Open_Click" />
                 <MenuItem x:Name="Menu_Save" Header="{lex:Loc Save}" Click="Menu_Save_Click" />
@@ -70,6 +70,12 @@
                 <Separator />
                 <MenuItem x:Name="Menu_ExportRender" Header="{lex:Loc ExportVideo}" Click="Menu_ExportRender_Click"
                           IsEnabled="False" />
+                <Separator />
+                <MenuItem x:Name="Menu_AllExport" Header="{lex:Loc AllExport}" Click="Menu_AllExport_Click"
+                          IsEnabled="True" />
+                <Separator />
+                <MenuItem x:Name="Menu_change" Header="{lex:Loc Change}" Click="Menu_Change_Click"
+                          IsEnabled="True" />
 
             </MenuItem>
             <MenuItem x:Name="MenuEdit" Header="{lex:Loc Edit}" IsEnabled="False"

@@ -302,7 +302,7 @@ public partial class MainWindow : Window
         Bass.BASS_ChannelSetAttribute(holdRiserStream, BASSAttribute.BASS_ATTRIB_VOL,
             editorSetting!.Default_Hanabi_Level);
         var info = Bass.BASS_ChannelGetInfo(bgmStream);
-        if (info.freq != 44100) MessageBox.Show(GetLocalizedString("Warn44100Hz"), GetLocalizedString("Attention"));
+        //if (info.freq != 44100) MessageBox.Show(GetLocalizedString("Warn44100Hz"), GetLocalizedString("Attention"));
         ReadWaveFromFile();
         SimaiProcess.ClearData();
 
@@ -362,12 +362,12 @@ public partial class MainWindow : Window
         {
             songLength = Bass.BASS_ChannelBytes2Seconds(bgmDecode,
                 Bass.BASS_ChannelGetLength(bgmDecode, BASSMode.BASS_POS_BYTE));
-/*                int sampleNumber = (int)((songLength * 1000) / (0.02f * 1000));
-                wavedBs = new float[sampleNumber];
-                for (int i = 0; i < sampleNumber; i++)
-                {
-                    wavedBs[i] = Bass.BASS_ChannelGetLevels(bgmDecode, 0.02f, BASSLevel.BASS_LEVEL_MONO)[0];
-                }*/
+            /*                int sampleNumber = (int)((songLength * 1000) / (0.02f * 1000));
+                            wavedBs = new float[sampleNumber];
+                            for (int i = 0; i < sampleNumber; i++)
+                            {
+                                wavedBs[i] = Bass.BASS_ChannelGetLevels(bgmDecode, 0.02f, BASSLevel.BASS_LEVEL_MONO)[0];
+                            }*/
             Bass.BASS_StreamFree(bgmDecode);
             var bgmSample = Bass.BASS_SampleLoad(maidataDir + "/track" + (useOgg ? ".ogg" : ".mp3"), 0, 0, 1, BASSFlag.BASS_DEFAULT);
             var bgmInfo = Bass.BASS_SampleGetInfo(bgmSample);
@@ -1009,7 +1009,7 @@ public partial class MainWindow : Window
                 Bass.BASS_ChannelSetPosition(bgmStream, 0);
                 startAt = DateTime.Now.AddSeconds(5d);
                 //TODO: i18n
-                MessageBox.Show(GetLocalizedString("AskRender"), GetLocalizedString("Attention"));
+                // MessageBox.Show(GetLocalizedString("AskRender"), GetLocalizedString("Attention"));
                 InternalSwitchWindow(false);
                 generateSoundEffectList(0.0, isOpIncluded);
                 var task = new Task(() => renderSoundEffect(5d));
@@ -1121,8 +1121,8 @@ public partial class MainWindow : Window
             TogglePause();
         else
         {
-            if (lastEditorState != EditorControlMethod.Pause && 
-                editorSetting!.SyntaxCheckLevel == 2 && 
+            if (lastEditorState != EditorControlMethod.Pause &&
+                editorSetting!.SyntaxCheckLevel == 2 &&
                 SyntaxChecker.GetErrorCount() != 0)
             {
                 ShowErrorWindow();
@@ -1130,7 +1130,7 @@ public partial class MainWindow : Window
             }
             TogglePlay(playMethod);
         }
-            
+
     }
 
     private void TogglePlayAndStop(PlayMethod playMethod = PlayMethod.Normal)
@@ -1509,7 +1509,7 @@ public partial class MainWindow : Window
         #endregion
 
         // 检查是否需要更新软件
-
+        /*
         try
         {
             requestHandler(
@@ -1517,7 +1517,7 @@ public partial class MainWindow : Window
         } catch {
             // 网络请求失败
             if (!onStart) MessageBox.Show(GetLocalizedString("RequestFail"), GetLocalizedString("CheckUpdate"));
-        }
+        }*/
     }
 
     public string GetWindowsTitleString()
